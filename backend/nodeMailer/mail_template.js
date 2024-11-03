@@ -321,8 +321,7 @@ export const transferTemplate = `<!DOCTYPE html>
 </html>
 `;
 
-export function account_close() {
-    return `<!DOCTYPE html>
+export const closureTemplate =`<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -395,4 +394,3 @@ export function account_close() {
 </body>
 </html>
 `;
-}

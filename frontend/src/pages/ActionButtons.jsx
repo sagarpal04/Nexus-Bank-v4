@@ -64,6 +64,7 @@ export default function ActionButtons({
           data: {
             email: deleteEmail,
             password: deleteEmailPassword,
+            name: name,
           },
         }
       );

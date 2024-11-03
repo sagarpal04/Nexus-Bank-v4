@@ -6,6 +6,7 @@ import transporter from "../nodeMailer/nodemailer.js";
 import { loginTemplate as originalLoginTemplate } from "../nodeMailer/mail_template.js";
 import {moneyAddedTemplate as originalMoneyAddedTemplate} from "../nodeMailer/mail_template.js";
 import {transferTemplate as originalTransferTemplate} from "../nodeMailer/mail_template.js";
+import {closureTemplate as originalClosureTemplate} from "../nodeMailer/mail_template.js";
 
 // Signup function with password hashing
 export function signup(req, res) {
@@ -124,7 +125,9 @@ export function accountDetails(req, res) {
 
 // Function to delete a user account with password verification
 export function deleteAccount(req, res) {
-  const { email, password } = req.body;
+  const { email, password , name} = req.body;
+  let closureTemplate = originalClosureTemplate;
+  closureTemplate = closureTemplate.replace(`{%CUSTOMER_NAME%}`, name);
 
   db.query("SELECT * FROM users WHERE email = ?", [email], (err, results) => {
     if (err) {
@@ -148,6 +151,18 @@ export function deleteAccount(req, res) {
         if (err) {
           return res.status(500).json({ message: "Database query error" });
         }
+        const mailOptions = {
+          from: '"Nexus Bank" <nexus.bank.org@gmail.com>', // Sender address
+          to: email,
+          subject: 'Account Deleted Successfully', // Subject line
+          html: closureTemplate
+      };
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.log(error);
+        }
+        console.log('Email sent: ' + info.response);  
+      })
         return res.status(200).json({ message: "Account deleted" });
       });
     });
