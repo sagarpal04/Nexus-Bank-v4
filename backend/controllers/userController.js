@@ -240,6 +240,8 @@ export function transferTo(req, res) {
     .replace('{%CUSTOMER_NAME%}', name)
     .replace('{%AMOUNT%}', amount)
     .replace('{%RECIPIENT_NAME%}', email);
+    let moneyAddedTemplate = originalMoneyAddedTemplate;
+  moneyAddedTemplate = moneyAddedTemplate.replace('{%CUSTOMER_NAME%}', name).replace('{%AMOUNT%}', amount);
 
   // Check if the recipient exists
   db.query("SELECT * FROM users WHERE email = ?", [email], (err, results) => {
@@ -335,7 +337,12 @@ export function transferTo(req, res) {
             subject: 'Amount Transferred Successfully', // Subject line
             html: transferTemplate,
           };
-
+          const mailOptions2 = {
+            from: '"Nexus Bank" <nexus.bank.org@gmail.com>', // Sender address
+            to: email,
+            subject: 'Amount Added to Your Account', // Subject line
+            html: moneyAddedTemplate,
+          }
           transporter.sendMail(mailOptions, (error, info) => {
             if (error) {
               console.error('Error sending email:', error);
@@ -345,7 +352,16 @@ export function transferTo(req, res) {
             console.log('Email sent: ' + info.response);
             return res.json({ message: "Transaction added successfully" });
           });
+          transporter.sendMail(mailOptions2, (error, info) => {
+            if (error) {
+              console.error('Error sending email:', error);
+              return res.status(500).json({ message: "Failed to send email" });
+            }
+            console.log('Email sent: ' + info.response);
+            return res.json({ message: "Transaction added successfully" });
+          })
         })
+
         .catch((errorMessage) => {
           return res.status(500).json({ error: errorMessage });
         });
